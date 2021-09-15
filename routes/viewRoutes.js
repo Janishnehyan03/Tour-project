@@ -7,7 +7,7 @@ const bookingController = require("../controllers/bookingController");
 
 router.get(
   "/",
-  bookingController.createBookingCheckout,//this will work only if booking created, otherwise never runs
+  // bookingController.createBookingCheckout,//this will work only if booking created, otherwise never runs
   authController.isLoggedIn,
   viewController.getOverView
 ); //isLoggedIn is used for unprotected routes

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { showAlert } from "./alerts";
-
+// import Stripe from "stripe";
 export const bookTour = async (tourId) => {
   try {
     const stripe = Stripe(

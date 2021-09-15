@@ -9,6 +9,8 @@ const xss = require("xss-clean");
 const cookieParser = require("cookie-parser");
 const hpp = require("hpp");
 const compression = require("compression");
+const bodyParser = require("body-parser");
+
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const viewRouter = require("./routes/viewRoutes");
@@ -16,6 +18,7 @@ const tourRouter = require("./routes/tourRoutes");
 const userRouter = require("./routes/userRoutes");
 const reviewRouter = require("./routes/reviewRoutes");
 const bookingRouter = require("./routes/bookingRouter");
+const bookingController = require("./controllers/bookingController");
 const cors = require("cors");
 app.enable("trust proxy");
 
@@ -33,7 +36,14 @@ const limiter = rateLimit({
   message: "Too many requests, please try again after one hour",
 });
 
-app.use("/", limiter);
+app.use("/api", limiter);
+
+app.post(
+  "/webhook-checkout",
+  bodyParser.raw({ type: "application/json" }),
+  bookingController.webhookCheckout
+); //don't use this below JSON,
+//because it can't accept any JSON data
 
 //view engine
 app.set("view engine", "pug");

@@ -14,7 +14,12 @@ const app = require("./app");
 console.log(app.get("env"));
 
 //CONNECT DB
-const DB = process.env.DATABASE_ATLAS;
+// let DB = process.env.DATABASE_ATLAS;
+if (process.env.NODE_ENV === "production") {
+  DB = process.env.DATABASE_ATLAS;
+}else{
+  DB=process.env.DATABASE_LOCAL
+}
 mongoose
   .connect(DB, {
     useCreateIndex: true,
