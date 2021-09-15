@@ -9,20 +9,30 @@ const xss = require("xss-clean");
 const cookieParser=require('cookie-parser')
 const hpp = require("hpp");
 const compression=require('compression')
-
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
+const viewRouter=require('./routes/viewRoutes')
+const tourRouter = require("./routes/tourRoutes");
+const userRouter = require("./routes/userRoutes");
+const reviewRouter = require("./routes/reviewRoutes");
+const bookingRouter=require('./routes/bookingRouter')
+
+app.enable('trust proxy')
+
 //middlewares
 app.use(helmet()); //set security HTTP
+
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
+
 // Limit requests
 const limiter = rateLimit({
   max: 100,
   windowMs: 60 * 60 * 1000, //100 requests in one hour,
   message: "Too many requests, please try again after one hour",
 });
+
 app.use("/", limiter);
 
 //view engine 
@@ -52,11 +62,6 @@ app.use(
 
 app.use(compression()) //works on texts
 
-const viewRouter=require('./routes/viewRoutes')
-const tourRouter = require("./routes/tourRoutes");
-const userRouter = require("./routes/userRoutes");
-const reviewRouter = require("./routes/reviewRoutes");
-const bookingRouter=require('./routes/bookingRouter')
 //Routes
 app.use("/", viewRouter);
 app.use("/api/v1/tours", tourRouter);

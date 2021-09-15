@@ -3,21 +3,18 @@ const dotenv = require("dotenv");
 
 // Uncaught exeption like console.log(x) not defined
 process.on("uncaughtException", (err) => {
-  console.log(
-    "uncaughtException",
-    "Website is going to shut down 😢"
-    );
-    console.log(err);
-    process.exit(1);// 0 for success and 1 for error
-  });
-  
-  dotenv.config({ path: "./config.env" });
-  const app = require("./app");
-  //development
+  console.log("uncaughtException", "Website is going to shut down 😢");
+  console.log(err);
+  process.exit(1); // 0 for success and 1 for error
+});
+
+dotenv.config({ path: "./config.env" });
+const app = require("./app");
+//development
 console.log(app.get("env"));
 
 //CONNECT DB
-const DB = process.env.DATABASE_ATLAS;
+const DB = process.env.DATABASE_LOCAL;
 mongoose
   .connect(DB, {
     useCreateIndex: true,
@@ -43,3 +40,9 @@ process.on("unhandledRejection", (err) => {
   });
 });
 
+process.on("SIGTERM", () => {
+  console.log("SIGTERM RECIEVED", "shutting down gracefully😴");
+  server.close(() => {
+    console.log("Please terminate it ");
+  });
+});

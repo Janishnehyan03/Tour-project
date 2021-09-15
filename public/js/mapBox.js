@@ -1,3 +1,4 @@
+import {mapboxgl} from 'mapbox-gl'
 export const displayMap = locations => {
     mapboxgl.accessToken =
       'pk.eyJ1IjoiamFuaXNobmVoeWFuMDMiLCJhIjoiY2t0YXlpdWZlMWs1bjJ1cGMxZDltN3hzeiJ9.pBorchZzN28cBWovhnm_xQ';

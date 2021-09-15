@@ -12,16 +12,19 @@ const signToken = (id) => {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
+
 //send token and set cookie in browser
-const sendToken = (user, statusCode, res) => {
+const sendToken = (user, statusCode, req,res) => {
   const token = signToken(user._id);
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
+    secure: req.secure || req.headers("x-forwarded-proto") === "https"
+
   };
-  if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
+
   res.cookie("jwt", token, cookieOptions);
   // remove password from output
   user.password = undefined;
@@ -36,7 +39,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create(req.body);
   const url = `${req.protocol}://${req.get("host")}/me`;
   await new Email(newUser, url).sendWelcome();
-  sendToken(newUser, 200, res);
+  sendToken(newUser, 200, req,res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -52,7 +55,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError("Incorrect Email Or Password", 401));
   }
   // 3) if everything ok, send token to client
-  sendToken(user, 200, res);
+  sendToken(user, 200, req,res);
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -123,7 +126,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
       "host"
     )}/api/v1/users/resetPassword/${resetToken}`;
 
-    await new Email(user,resetUrl).sendPasswordReset()
+    await new Email(user, resetUrl).sendPasswordReset();
     res.status(200).json({
       status: "success",
       message: "token sent to email !",
@@ -162,7 +165,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   // 3) update changePasswordAt for the current user
 
   // 4) Login the user with JWT
-  sendToken(user, 200, res);
+  sendToken(user, 200, req,res);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -177,7 +180,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   user.passwordConfirm = req.body.passwordConfirm;
   await user.save(); // don't use findByIdAndUpdate() ⚠ ⚠, because of the "pre" middleware in userModel
   // 4) log user in, send JWT
-  sendToken(user, 200, res);
+  sendToken(user, 200,req, res);
 });
 
 //if there is no error, there will be a logged in user
