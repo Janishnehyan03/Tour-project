@@ -8,7 +8,8 @@ html
             link(rel="stylesheet", href="/css/style.css")
             link(rel="shortcut icon", href="/img/favicon.png", type="image/png")
             title=`Nouters | ${title}`
-    body 
+            
+    body(data-alert=`${alert ? alert:''}`)
         include _header
            
         block content

@@ -3,6 +3,13 @@ const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const Booking = require("../models/bookingModel");
+
+exports.alerts = (req, res, next) => {
+  const { alert } = req.query;
+  if (alert === "booking") res.locals.alert = "your booking is successfull";
+  next();
+};
+
 exports.getOverView = async (req, res) => {
   const tours = await Tour.find();
   res.render("overview", { title: "All Tours", tours });
@@ -50,6 +57,7 @@ exports.getMyTours = catchAsync(async (req, res, next) => {
   // 2) Find tours in the returned IDs
   const tourIDs = bookings.map((el) => el.tour); //el is current element
   const tours = await Tour.find({ _id: { $in: tourIDs } });
+  console.log(tours);
   res.status(200).render("overview", {
     title: "My Bookings",
     tours,

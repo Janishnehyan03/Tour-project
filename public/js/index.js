@@ -1,8 +1,10 @@
 import "@babel/polyfill";
-import { login, logout,signup } from "./login";
+import { login, logout, signup } from "./login";
 import { displayMap } from "./mapBox";
 import { bookTour } from "./stripe";
 import { updateSettings } from "./updateSettings";
+import { showAlert } from "./alerts";
+
 // DOM ELEMENTS
 const mapBox = document.getElementById("map");
 const loginForm = document.querySelector(".form_login");
@@ -30,7 +32,7 @@ if (signupForm) {
     const name = document.getElementById("name").value;
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
-    signup(name,email, password);
+    signup(name, email, password);
   });
 }
 
@@ -74,3 +76,6 @@ if (bookBtn) {
     bookTour(tourId);
   });
 }
+
+const alertMessage = document.querySelector("body").dataset.alert;
+if (alertMessage) showAlert("success", alertMessage, 20);
