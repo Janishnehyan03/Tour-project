@@ -78,6 +78,7 @@ app.use(
 app.use(compression()); //works on texts
 
 //Routes
+
 app.use("/", viewRouter);
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
