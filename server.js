@@ -8,20 +8,16 @@ process.on("uncaughtException", (err) => {
   process.exit(1); // 0 for success and 1 for error
 });
 
-dotenv.config({ path: "./config.env" });
+dotenv.config();
 const app = require("./app");
 //development
 console.log(app.get("env"));
 
 //CONNECT DB
 // let DB = process.env.DATABASE_ATLAS;
-if (process.env.NODE_ENV === "production") {
-  DB = process.env.DATABASE_ATLAS;
-}else{
-  DB=process.env.DATABASE_LOCAL
-}
+
 mongoose
-  .connect(DB, {
+  .connect(process.env.MONGO_URI, {
     useCreateIndex: true,
     useNewUrlParser: true,
     useFindAndModify: false,
@@ -31,7 +27,7 @@ mongoose
     console.log("DB connected");
   });
 // console.log(process.env);
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 const server = app.listen(port, () => {
   console.log(`App is running on port ${port}`);
 });
