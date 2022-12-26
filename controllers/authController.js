@@ -221,6 +221,7 @@ exports.logout = (req, res) => {
 };
 
 exports.checkUserLoggedIn = async (req, res, next) => {
+  console.log(req.cookies);
   if (req.cookies.jwt) {
     try {
       const decoded = await promisify(jwt.verify)(
