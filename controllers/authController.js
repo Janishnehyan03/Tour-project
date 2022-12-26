@@ -229,21 +229,14 @@ exports.checkUserLoggedIn = async (req, res, next) => {
         process.env.JWT_SECRET
       ); //this will return a promise
       // 2) CHECK IF THE USER STILL EXISTS
-      const currentUser = await User.findById(decoded.id); //This is not a new user, just console the "decoded", there will be an "id". checking the user's existance after verifying "token", and he did't change his password
-      if (!currentUser) {
-        return next();
-      }
-
-      // 3) CHECK IF USER CHANGE PASSWORD AFTER TOKEN ISSUED
-      if (currentUser.changePasswordAfter(decoded.iat)) {
-        return next();
-      } else {
-        // res.locals.user = currentUser;
-        res.status(200).json({ user: currentUser });
-      }
+      const currentUser = await User.findById(decoded.id);
+      // res.locals.user = currentUser;
+      res.status(200).json({ user: currentUser });
     } catch (err) {
       console.log(err);
-      res.status(200).json({ message: "not logged in" });
+      res.status(200).json({ err });
     }
+  } else {
+    res.status(200).json({ message: "cookies not found" });
   }
 };
