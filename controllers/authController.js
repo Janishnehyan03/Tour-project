@@ -20,8 +20,9 @@ const sendToken = (user, statusCode, req, res) => {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
-    httpOnly: true,
-    secure: req.secure || req.headers("x-forwarded-proto") === "https",
+    // httpOnly: true,
+    // secure: process.env.NODE_ENV !== "development",
+    secure: req.secure || req.headers["x-forwarded-proto"] === "https",
   };
 
   res.cookie("jwt", token, cookieOptions);
@@ -235,12 +236,13 @@ exports.checkUserLoggedIn = async (req, res, next) => {
       // 3) CHECK IF USER CHANGE PASSWORD AFTER TOKEN ISSUED
       if (currentUser.changePasswordAfter(decoded.iat)) {
         return next();
+      } else {
+        // res.locals.user = currentUser;
+        res.status(200).json({ user: currentUser });
       }
-      res.locals.user = currentUser;
-      res.status(200).json({ user: currentUser });
     } catch (err) {
-      return next();
+      console.log(err);
+      res.status(200).json({ message: "not logged in" });
     }
   }
-  next();
 };

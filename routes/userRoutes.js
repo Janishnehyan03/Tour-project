@@ -7,7 +7,7 @@ router.post("/login", authController.login);
 router.get("/logout", authController.logout);
 router.post("/forgotPassword", authController.forgotPassword);
 router.patch("/resetPassword/:token", authController.resetPassword);
-router.put("/checkLogin", authController.checkUserLoggedIn);
+router.post("/checkLogin", authController.checkUserLoggedIn);
 
 //  This middleware will run for the below routes
 router.use(authController.protect); // protect all below routes, doesn't work for the above functions
