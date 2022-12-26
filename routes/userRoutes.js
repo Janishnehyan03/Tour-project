@@ -24,6 +24,7 @@ router.delete("/delete", userController.deleteMe);
 // -------------------- //
 
 router.use(authController.restrictTo("admin")); // restricted the below routes, only for admins
+router.put("/checkLogin", authController.checkUserLoggedIn);
 
 router
   .route("/:id")

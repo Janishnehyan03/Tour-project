@@ -14,15 +14,14 @@ const signToken = (id) => {
 };
 
 //send token and set cookie in browser
-const sendToken = (user, statusCode, req,res) => {
+const sendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
-    secure: req.secure || req.headers("x-forwarded-proto") === "https"
-
+    secure: req.secure || req.headers("x-forwarded-proto") === "https",
   };
 
   res.cookie("jwt", token, cookieOptions);
@@ -39,7 +38,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create(req.body);
   const url = `${req.protocol}://${req.get("host")}/me`;
   await new Email(newUser, url).sendWelcome();
-  sendToken(newUser, 200, req,res);
+  sendToken(newUser, 200, req, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -55,7 +54,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError("Incorrect Email Or Password", 401));
   }
   // 3) if everything ok, send token to client
-  sendToken(user, 200, req,res);
+  sendToken(user, 200, req, res);
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -165,7 +164,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   // 3) update changePasswordAt for the current user
 
   // 4) Login the user with JWT
-  sendToken(user, 200, req,res);
+  sendToken(user, 200, req, res);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -180,7 +179,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   user.passwordConfirm = req.body.passwordConfirm;
   await user.save(); // don't use findByIdAndUpdate() ⚠ ⚠, because of the "pre" middleware in userModel
   // 4) log user in, send JWT
-  sendToken(user, 200,req, res);
+  sendToken(user, 200, req, res);
 });
 
 //if there is no error, there will be a logged in user
@@ -218,4 +217,30 @@ exports.logout = (req, res) => {
     httpOnly: true,
   });
   res.status(200).json({ status: "success" });
+};
+
+exports.checkUserLoggedIn = async (req, res, next) => {
+  if (req.cookies.jwt) {
+    try {
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      ); //this will return a promise
+      // 2) CHECK IF THE USER STILL EXISTS
+      const currentUser = await User.findById(decoded.id); //This is not a new user, just console the "decoded", there will be an "id". checking the user's existance after verifying "token", and he did't change his password
+      if (!currentUser) {
+        return next();
+      }
+
+      // 3) CHECK IF USER CHANGE PASSWORD AFTER TOKEN ISSUED
+      if (currentUser.changePasswordAfter(decoded.iat)) {
+        return next();
+      }
+      res.locals.user = currentUser;
+      res.status(200).json({ user: currentUser });
+    } catch (err) {
+      return next();
+    }
+  }
+  next();
 };
