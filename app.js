@@ -25,9 +25,7 @@ app.enable("trust proxy");
 //middlewares
 app.use(helmet()); //set security HTTP
 
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
-}
+app.use(morgan("dev"));
 
 // Limit requests
 const limiter = rateLimit({

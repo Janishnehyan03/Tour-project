@@ -65,14 +65,14 @@ const sendErrorProd = (err, req, res) => {
   });
 };
 module.exports = (err, req, res, next) => {
-  //   console.log(err.stack);
+  console.log(err);
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
   if (process.env.NODE_ENV === "development") {
     sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === "production") {
     let error = { ...err };
-    error.message=err.message
+    error.message = err.message;
     if (error.name === "CastError") error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDuplicateFieldsDB(error);
     if (error.name === "ValidatorError") error = handleValidationErrorDB(error);
