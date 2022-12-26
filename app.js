@@ -50,7 +50,12 @@ app.set("view engine", "pug");
 app.use(express.static(path.join(__dirname, "public")));
 app.set("views", path.join(__dirname, "views"));
 //implementing cors
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 app.options("*", cors());
 // app.options('/api/v1/tours',cors())
 
