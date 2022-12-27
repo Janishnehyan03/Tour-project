@@ -27,14 +27,6 @@ const cors = require("cors");
 
 app.use(morgan("dev"));
 
-// Limit requests
-const limiter = rateLimit({
-  max: 100,
-  windowMs: 60 * 60 * 1000, //100 requests in one hour,
-  message: "Too many requests, please try again after one hour",
-});
-
-app.use("/api", limiter);
 
 app.post(
   "/webhook-checkout",
@@ -54,8 +46,7 @@ app.use(
     credentials: true,
   })
 );
-app.options("*", cors());
-// app.options('/api/v1/tours',cors())
+
 
 app.use(express.json({ limit: "10kb" }));
 app.use(cookieParser()); //reads cookie
