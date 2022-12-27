@@ -21,7 +21,7 @@ const sendToken = (user, statusCode, req, res) => {
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
-    secure: true,
+    secure: req.secure || req.headers("x-forwarded-proto") === "https",
     // secure: req.secure || req.headers["x-forwarded-proto"] === "https",
   };
 
@@ -55,7 +55,21 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError("Incorrect Email Or Password", 401));
   }
   // 3) if everything ok, send token to client
-  sendToken(user, 200, req, res);
+  // sendToken(user, 200, req, res);
+  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "30d",
+  });
+  res
+    .cookie("jwt", token, {
+      httpOnly: true,
+      // max age 30 days
+      maxAge: 3600000 * 24 * 30,
+    })
+    .status(200);
+  user.password = undefined;
+  res.status(200).json({
+    user: user,
+  });
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -221,22 +235,12 @@ exports.logout = (req, res) => {
 };
 
 exports.checkUserLoggedIn = async (req, res, next) => {
-  console.log(req.cookies);
-  if (req.cookies.jwt) {
-    try {
-      const decoded = await promisify(jwt.verify)(
-        req.cookies.jwt,
-        process.env.JWT_SECRET
-      ); //this will return a promise
-      // 2) CHECK IF THE USER STILL EXISTS
-      const currentUser = await User.findById(decoded.id);
-      // res.locals.user = currentUser;
-      res.status(200).json({ user: currentUser });
-    } catch (err) {
-      console.log(err);
-      res.status(200).json({ err });
-    }
+  let token = req.cookies.jwt;
+  if (!token) {
+    res.status(200).json({ error: "user not logged in" });
   } else {
-    res.status(200).json({ message: "cookies not found" });
+    let decoded = jwt.verify(token, process.env.JWT_SECRET);
+    let user = await User.findById(decoded.userId)
+    res.status(200).json({ user: user });
   }
 };
