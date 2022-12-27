@@ -21,8 +21,7 @@ const sendToken = (user, statusCode, req, res) => {
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
-    secure: req.secure || req.headers("x-forwarded-proto") === "https",
-    // secure: req.secure || req.headers["x-forwarded-proto"] === "https",
+    secure: false,
   };
 
   res.cookie("jwt", token, cookieOptions);
@@ -55,21 +54,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError("Incorrect Email Or Password", 401));
   }
   // 3) if everything ok, send token to client
-  // sendToken(user, 200, req, res);
-  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "30d",
-  });
-  res
-    .cookie("jwt", token, {
-      httpOnly: true,
-      // max age 30 days
-      maxAge: 3600000 * 24 * 30,
-    })
-    .status(200);
-  user.password = undefined;
-  res.status(200).json({
-    user: user,
-  });
+  sendToken(user, 200, req, res);
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -235,12 +220,21 @@ exports.logout = (req, res) => {
 };
 
 exports.checkUserLoggedIn = async (req, res, next) => {
-  let token = req.cookies.jwt;
+  let token;
+  console.log(req.headers.cookie);
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
   if (!token) {
-    res.status(200).json({ error: "user not logged in" });
+    res.status(200).json({ error: "no token provided" });
   } else {
     let decoded = jwt.verify(token, process.env.JWT_SECRET);
-    let user = await User.findById(decoded.userId)
+    let user = await User.findById(decoded.userId);
     res.status(200).json({ user: user });
   }
 };

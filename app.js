@@ -20,10 +20,10 @@ const reviewRouter = require("./routes/reviewRoutes");
 const bookingRouter = require("./routes/bookingRouter");
 const bookingController = require("./controllers/bookingController");
 const cors = require("cors");
-app.enable("trust proxy");
+// app.enable("trust proxy");
 
-//middlewares
-app.use(helmet()); //set security HTTP
+// //middlewares
+// app.use(helmet()); //set security HTTP
 
 app.use(morgan("dev"));
 
