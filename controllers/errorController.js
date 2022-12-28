@@ -15,10 +15,12 @@ const handleValidationErrorDB = () => {
 };
 const handleJWTError = () =>
   new AppError("Invalid token, please login error", 404);
-const handleJWTExpiredError = (err) =>
+
+const handleJWTExpiredError = () =>
   new AppError("your token expired, please try again", 401);
 
 const sendErrorDev = (err, req, res) => {
+  console.log("error", err);
   //API
   if (req.originalUrl.startsWith("/api")) {
     return res.status(err.statusCode).json({
@@ -35,24 +37,17 @@ const sendErrorDev = (err, req, res) => {
   });
 };
 const sendErrorProd = (err, req, res) => {
-  //API
-  if (req.originalUrl.startsWith("/api")) {
-    if (err.isOperational) {
-      return res.status(err.statusCode).json({
-        status: err.status,
-        message: err.message,
-      });
-    }
-    //PROGRAMMING ERRORS
-    console.error(err);
-    return res.status(500).json({
-      status: "error",
-      message: "Something went wrong",
-    });
-  }
+  // //API
+  // if (req.originalUrl.startsWith("/api")) {
+  //   if (err.isOperational) {
+  //     res.status(err.statusCode).json({
+  //       status: err.status,
+  //       message: err.message,
+  //     });
+  //   }
+  //
   //RENDERED WEBSITE
   if (err.isOperational) {
-    console.log(err);
     return res.status(err.statusCode).render("error", {
       title: "Something went wrong",
       msg: err.message,
@@ -65,22 +60,20 @@ const sendErrorProd = (err, req, res) => {
   });
 };
 module.exports = (err, req, res, next) => {
-  console.log(err);
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
   res.status(err.statusCode).json({ err });
-  // if (process.env.NODE_ENV === "development") {
-  sendErrorDev(err, req, res);
-  // }
-  // else if (process.env.NODE_ENV === "production") {
-  //   let error = { ...err };
-  //   error.message = err.message;
-  //   if (error.name === "CastError") error = handleCastErrorDB(error);
-  //   if (error.code === 11000) error = handleDuplicateFieldsDB(error);
-  //   if (error.name === "ValidatorError") error = handleValidationErrorDB(error);
-  //   if (error.name === "JsonWebTokenError") error = handleJWTError();
-  //   if (error.name === "TokenExpiredError") error = handleJWTExpiredError();
+  if (process.env.NODE_ENV === "development") {
+    sendErrorDev(err, req, res);
+  } else if (process.env.NODE_ENV === "production") {
+    let error = { ...err };
+    error.message = err.message;
+    if (error.name === "CastError") error = handleCastErrorDB(error);
+    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
+    if (error.name === "ValidatorError") error = handleValidationErrorDB(error);
+    if (err.name === "JsonWebTokenError") error = handleJWTError(err);
+    if (err.name === "TokenExpiredError") error = handleJWTExpiredError();
 
-  //   sendErrorProd(error, req, res);
-  // }
+    // sendErrorProd(error, req, res);
+  }
 };

@@ -213,28 +213,32 @@ exports.isLoggedIn = async (req, res, next) => {
 //logout
 exports.logout = (req, res) => {
   res.cookie("jwt", "logged out", {
-    expires: new Date(Date.now() + 10 * 1000),
+    expires: new Date(Date.now() + 1000),
     httpOnly: true,
   });
   res.status(200).json({ status: "success" });
 };
 
 exports.checkUserLoggedIn = async (req, res, next) => {
-  let token;
-  console.log(req.headers.cookie);
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  } else if (req.cookies.jwt) {
-    token = req.cookies.jwt;
-  }
-  if (!token) {
-    res.status(200).json({ error: "no token provided" });
-  } else {
-    let decoded = jwt.verify(token, process.env.JWT_SECRET);
-    let user = await User.findById(decoded.userId);
-    res.status(200).json({ user: user });
+  try {
+    let token;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    } else if (req.cookies.jwt) {
+      token = req.cookies.jwt;
+    }
+
+    if (!token) {
+      res.status(200).json({ error: "no token provided" });
+    } else {
+      let decoded = jwt.verify(token, process.env.JWT_SECRET);
+      let user = await User.findById(decoded.id);
+      res.status(200).json({ user: user });
+    }
+  } catch (error) {
+    next(error);
   }
 };
