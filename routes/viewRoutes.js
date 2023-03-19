@@ -11,7 +11,7 @@ router.get(
   authController.isLoggedIn,
   viewController.getOverView
 ); //isLoggedIn is used for unprotected routes
-router.get("/tour/:slug", authController.isLoggedIn, viewController.getTour);
+router.get("/tour/:slug", viewController.getTour);
 router.get("/login", authController.isLoggedIn, viewController.getLoginForm);
 // router.get("/signup", authController.isLoggedIn, viewController.getSignupForm);
 router.get("/me", authController.protect, viewController.getAccount);

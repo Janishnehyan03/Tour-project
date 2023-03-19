@@ -41,10 +41,21 @@ exports.createOne = (model) =>
     });
   });
 
-exports.getOne = (Model, populateOptions) =>
+exports.getOne = (
+  Model,
+  populateOptions,
+  populateOptions1,
+  populateOptions2,
+  populateOptions3
+) =>
   catchAsync(async (req, res, next) => {
     let query = Model.findById(req.params.id);
-    if (populateOptions) query = query.populate(populateOptions); //check on the tourSchema
+    if (populateOptions)
+      query = query
+        .populate(populateOptions)
+        .populate(populateOptions1)
+        .populate(populateOptions2)
+        .populate(populateOptions3); //check on the tourSchema
     const doc = await query;
     if (!doc) {
       return next(new AppError("no document found in this ID", 404));
@@ -55,12 +66,25 @@ exports.getOne = (Model, populateOptions) =>
     });
   });
 
-exports.getAll = (Model) =>
+exports.getAll = (
+  Model,
+  populateOptions,
+  populateOptions1,
+  populateOptions2,
+  populateOptions3
+) =>
   catchAsync(async (req, res, next) => {
     let filter = {}; // to allow for nested getReviews on single tour
     if (req.params.tourId) filter = { tour: req.params.tourId };
     //EXECUTE THE QUERY
-    const features = new APIFeatures(Model.find(filter), req.query) //[Tour.find()] is the queryObj & [req.query] is queryString
+    const features = new APIFeatures(
+      Model.find(filter)
+        .populate(populateOptions)
+        .populate(populateOptions1)
+        .populate(populateOptions2)
+        .populate(populateOptions3),
+      req.query
+    ) //[Tour.find()] is the queryObj & [req.query] is queryString
       .filter()
       .sort()
       .limitFields()
@@ -68,7 +92,6 @@ exports.getAll = (Model) =>
     const doc = await features.query;
     //SEND RESPONSE
     res.status(200).json({
-      results: doc.length,
       data: doc,
     });
   });

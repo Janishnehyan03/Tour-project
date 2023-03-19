@@ -72,7 +72,7 @@ const tourSchema = mongoose.Schema(
     },
     imageCover: {
       type: String,
-      required: [true, "A tour must have a cover image"],
+      // required: [true, "A tour must have a cover image"],
     },
     images: [String],
     createdAt: {
@@ -116,10 +116,10 @@ const tourSchema = mongoose.Schema(
       },
     ],
   },
-  {
-    toJSON: { virtuals: true }, // it means that, when it comes as JSON data or Object data, it will work, otherwise virtuals don't work
-    toObject: { virtuals: true },
-  }
+  // {
+  //   toJSON: { virtuals: true }, // it means that, when it comes as JSON data or Object data, it will work, otherwise virtuals don't work
+  //   toObject: { virtuals: true },
+  // }
 );
 //index: this will help to scan a few documents, it can boost our indexes
 // tourSchema.index({ price: 1 });

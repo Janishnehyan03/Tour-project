@@ -23,6 +23,19 @@ const bookingSchema = mongoose.Schema({
     type: Boolean,
     default: true,
   },
+
+  razorpay_payment_id: {
+    type: String,
+    required: true,
+  },
+  razorpay_order_id: {
+    type: String,
+    required: true,
+  },
+  razorpay_signature: {
+    type: String,
+    required: true,
+  },
 });
 
 bookingSchema.pre(/^find/, function (next) {
@@ -30,7 +43,7 @@ bookingSchema.pre(/^find/, function (next) {
     path: "tour",
     select: "name",
   });
-  next()
+  next();
 });
 
 const Booking = mongoose.model("Booking", bookingSchema);

@@ -12,7 +12,7 @@ const signupForm = document.querySelector(".form_signup");
 const logoutBtn = document.querySelector(".nav__el--logout");
 const userDataForm = document.querySelector(".form-user-data");
 const userPasswordForm = document.querySelector(".form-user-password");
-const bookBtn = document.getElementById("book-tour");
+const bookBtn = document.getElementById("rzp-button1");
 // DELEGATIONS
 if (mapBox) {
   const locations = JSON.parse(mapBox.dataset.locations);
@@ -76,6 +76,9 @@ if (bookBtn) {
     bookTour(tourId);
   });
 }
-
+function hello(){
+  alert("Hello called")
+}
 const alertMessage = document.querySelector("body").dataset.alert;
 if (alertMessage) showAlert("success", alertMessage, 20);
+

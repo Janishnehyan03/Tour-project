@@ -10,7 +10,7 @@ const cookieParser = require("cookie-parser");
 const hpp = require("hpp");
 const compression = require("compression");
 const bodyParser = require("body-parser");
-
+const hbs =require('express-handlebars')
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const viewRouter = require("./routes/viewRoutes");
@@ -28,17 +28,11 @@ const cors = require("cors");
 app.use(morgan("dev"));
 
 
-app.post(
-  "/webhook-checkout",
-  bodyParser.raw({ type: "application/json" }),
-  bookingController.webhookCheckout
-); //don't use this below JSON,
-//because it can't accept any JSON data
-
 //view engine
-app.set("view engine", "pug");
+app.set('view engine', 'hbs');
 app.use(express.static(path.join(__dirname, "public")));
 app.set("views", path.join(__dirname, "views"));
+app.engine('hbs', hbs.engine({extname:"hbs",defaultLayout:"layout",layoutsDir:__dirname+'/views/layout/',partialsDir:__dirname+'/views/partials/'}));
 //implementing cors
 app.use(
   cors({
@@ -79,13 +73,13 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/reviews", reviewRouter);
 app.use("/api/v1/bookings", bookingRouter);
 //Route error handler (works only if above routes didn't work)
-app.all("*", (req, res, next) => {
-  // * stand for every routes
-  // const err = new Error(`Cant find ${req.originalUrl} on the server`);
-  // err.status = "fail";
-  // err.statusCode = 404;
-  next(new AppError(`Cant find ${req.originalUrl}  on the server`, 404));
-});
+// app.all("*", (req, res, next) => {
+//   // * stand for every routes
+//   // const err = new Error(`Cant find ${req.originalUrl} on the server`);
+//   // err.status = "fail";
+//   // err.statusCode = 404;
+//   next(new AppError(`Cant find ${req.originalUrl}  on the server`, 404));
+// });
 
 app.use(globalErrorHandler);
 //starts our app
