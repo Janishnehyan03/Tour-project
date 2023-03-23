@@ -391,7 +391,8 @@
             <p class="cta__text">
                 {{tour.duration}} days. 1 adventure. Infinite memories. Make it yours today!
             </p>
-            <button class="btn btn--green span-all-rows">Book tour now!</button>
+            <button class="btn btn--green span-all-rows" id="rzp-button1" data-tour-id="{{tour._id}}"
+                data-price="{{tour.price}}" onclick="createOrder(this)">Book tour now!</button>
         </div>
     </div>
 </section>
@@ -411,3 +412,88 @@
         &copy; by Jonas Schmedtmann. All rights reserved.
     </p>
 </div>
+
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    async function orderSuccess(response, tourId, price) {
+        console.log(response)
+        try {
+            let data = await fetch('/api/v1/bookings/success/booking', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    tour: tourId,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                    price: price * 100
+                })
+            }).catch((err) => {
+                console.log(err)
+            })
+            return data
+
+        } catch (err) {
+            console.log(err.response)
+        }
+    }
+    async function createOrder(button) {
+        const tourId = button.getAttribute('data-tour-id');
+        const price = button.getAttribute('data-price');
+
+        let data = await fetch('/api/v1/bookings/' + tourId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+
+        let response = await data.json()
+
+        var options = {
+            "key": "rzp_test_PXZvFNXpJFylGx", // Enter the Key ID generated from the Dashboard
+            "amount": price * 100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+            "currency": "INR",
+            "name": "Acme Corp",
+            "description": "Test Transaction",
+            "order_id": response.order.id,
+            "image": "https://example.com/your_logo",
+            "handler": function (response) {
+                orderSuccess(response, tourId, price).then((success) => {
+                    console.log(success)
+                })
+            },
+            "prefill": {
+                "name": "Gaurav Kumar",
+                "email": "gaurav.kumar@example.com",
+                "contact": "9000090000"
+            },
+            "notes": {
+                "address": "Razorpay Corporate Office"
+            },
+            "theme": {
+                "color": "#3399cc"
+            }
+        };
+        var rzp1 = new Razorpay(options);
+        rzp1.on('payment.failed', function (response) {
+            alert(response.error.code);
+            alert(response.error.description);
+            alert(response.error.source);
+            alert(response.error.step);
+            alert(response.error.reason);
+            alert(response.error.metadata.order_id);
+            alert(response.error.metadata.payment_id);
+        });
+        document.getElementById('rzp-button1').onclick = function (e) {
+            rzp1.open();
+            e.preventDefault();
+        }
+
+    }
+
+
+</script>

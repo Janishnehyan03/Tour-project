@@ -21,20 +21,17 @@ const bookingSchema = mongoose.Schema({
   },
   paid: {
     type: Boolean,
-    default: true,
+    default: false,
   },
 
   razorpay_payment_id: {
     type: String,
-    required: true,
   },
   razorpay_order_id: {
     type: String,
-    required: true,
   },
   razorpay_signature: {
     type: String,
-    required: true,
   },
 });
 
